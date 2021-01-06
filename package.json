@@ -1,0 +1,28 @@
+{
+  "name": "@civ-clone/core-engine",
+  "version": "0.1.0",
+  "repository": "git@github.com:civ-clone/core-engine.git",
+  "keywords": [
+    "typescript",
+    "civilization"
+  ],
+  "author": "dom111 <dom111@users.noreply.github.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "build": "npm run ts:compile && npm run prettier:format",
+    "prettier:check": "prettier --config .prettierrc '**/*.ts'",
+    "prettier:format": "prettier --config .prettierrc '**/*.ts' --write",
+    "ts:compile": "tsc --build tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.3",
+    "prettier": "^2.1.2",
+    "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "@civ-clone/core-registry": "^0.1.0",
+    "@civ-clone/core-rule": "^0.1.0",
+    "glob": "^7.1.6"
+  }
+}

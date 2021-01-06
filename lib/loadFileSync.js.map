@@ -1,0 +1,1 @@
+{"version":3,"file":"loadFileSync.js","sourceRoot":"","sources":["loadFileSync.ts"],"names":[],"mappings":";;AAAA,yBAAyB;AAEzB,kBAAe,CAAC,IAAY,EAAU,EAAE;IACtC,EAAE,CAAC,UAAU,CAAC,IAAI,CAAC,CAAC;IAEpB,OAAO,EAAE,CAAC,YAAY,CAAC,IAAI,EAAE;QAC3B,QAAQ,EAAE,MAAM;KACjB,CAAC,CAAC;AACL,CAAC,CAAC"}
