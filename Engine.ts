@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events';
 import Start from './Rules/Start';
-import { instance as ruleRegistryInstance } from '@civ-clone/core-rule/RuleRegistry';
 import loadJSONSync from './lib/loadJSONSync';
 import * as fsModule from 'fs';
 import * as globModule from 'glob';
@@ -131,10 +130,7 @@ export class Engine extends EventEmitter implements IEngine {
     this.emit('engine:initialise');
 
     this.loadPlugins().then((): void => {
-      // TODO: it might be that this can be entirely removed and we don't need to rely on Events at all...
       this.emit('engine:start');
-
-      ruleRegistryInstance.process(Start);
     });
   }
 }

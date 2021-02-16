@@ -16,8 +16,6 @@ var _options, _started;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.instance = exports.Engine = void 0;
 const events_1 = require("events");
-const Start_1 = require("./Rules/Start");
-const RuleRegistry_1 = require("@civ-clone/core-rule/RuleRegistry");
 const loadJSONSync_1 = require("./lib/loadJSONSync");
 const fsModule = require("fs");
 const globModule = require("glob");
@@ -92,9 +90,7 @@ class Engine extends events_1.EventEmitter {
         __classPrivateFieldSet(this, _started, true);
         this.emit('engine:initialise');
         this.loadPlugins().then(() => {
-            // TODO: it might be that this can be entirely removed and we don't need to rely on Events at all...
             this.emit('engine:start');
-            RuleRegistry_1.instance.process(Start_1.default);
         });
     }
 }
