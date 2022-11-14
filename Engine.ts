@@ -1,14 +1,4 @@
-import { EventEmitter } from 'events';
-import Start from './Rules/Start';
-import loadJSONSync from './lib/loadJSONSync';
-import * as fsModule from 'fs';
-import * as globModule from 'glob';
-import * as path from 'path';
-import { IOptions } from 'glob';
-
-interface IGlob {
-  sync(pattern: string, options?: IOptions): string[];
-}
+import EventEmitter from '@dom111/typed-event-emitter/EventEmitter';
 
 export interface IEngine {
   debug(callback: (...args: any[]) => void): void;
@@ -32,7 +22,7 @@ export class Engine extends EventEmitter implements IEngine {
     return callback();
   }
 
-  emit(event: string | symbol, ...args: any[]): boolean {
+  emit(event: string | number, ...args: any[]): void {
     this.debug((): void =>
       console.log(`Engine#emit: ${String(event)}: ${args}`)
     );
@@ -40,69 +30,12 @@ export class Engine extends EventEmitter implements IEngine {
     return super.emit(event, ...args);
   }
 
-  getPackages(glob: IGlob = globModule, fs = fsModule): string[] {
-    const packageDetails: { [key: string]: any } = loadJSONSync(
-        './package.json'
-      ),
-      paths: string[] = packageDetails?.['civ-clone']?.paths || [
-        './node_modules/@civ-clone/*',
-      ],
-      packages: string[] = [];
+  loadPlugins(): Promise<void> {
+    this.emit('plugins:load:start');
 
-    paths.forEach((pathName: string) => {
-      (glob.sync(pathName) || []).forEach((pathName: string) => {
-        try {
-          fs.accessSync(pathName);
-
-          const packagePath: string = path.resolve(pathName, 'package.json');
-
-          fs.accessSync(packagePath);
-
-          const packageDetails: { [key: string]: any } = loadJSONSync(
-            packagePath
-          );
-
-          if (typeof packageDetails.main === 'string') {
-            const main: string = path.resolve(pathName, packageDetails.main);
-
-            fs.accessSync(main);
-
-            packages.push(main);
-
-            return;
-          }
-
-          const index: string = path.resolve(pathName, 'index.js');
-
-          fs.accessSync(index);
-
-          packages.push(index);
-
-          return;
-        } catch (e) {
-          this.emit('engine:plugins:load:read-path:failed', pathName);
-        }
-      });
+    return new Promise((resolve, reject) => {
+      this.once('plugins:load:end', () => resolve());
     });
-
-    return packages;
-  }
-
-  loadPlugins() {
-    this.emit('engine:plugins:load');
-
-    return Promise.all(
-      this.getPackages().map(
-        (packageName: string): Promise<any> =>
-          import(packageName)
-            .then((): boolean =>
-              this.emit('engine:plugins:load:success', packageName)
-            )
-            .catch((): boolean =>
-              this.emit('engine:plugins:load:failed', packageName)
-            )
-      )
-    ).then(() => this.emit('engine:plugins-loaded'));
   }
 
   /**

@@ -1,30 +1,24 @@
 "use strict";
-var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
 };
-var _options, _started;
+var _Engine_options, _Engine_started;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.instance = exports.Engine = void 0;
-const events_1 = require("events");
-const loadJSONSync_1 = require("./lib/loadJSONSync");
-const fsModule = require("fs");
-const globModule = require("glob");
-const path = require("path");
-class Engine extends events_1.EventEmitter {
+const EventEmitter_1 = require("@dom111/typed-event-emitter/EventEmitter");
+class Engine extends EventEmitter_1.default {
     constructor() {
         super(...arguments);
-        _options.set(this, {});
-        _started.set(this, false);
+        _Engine_options.set(this, {});
+        _Engine_started.set(this, false);
     }
     debug(callback) {
         if (!this.option('debug')) {
@@ -36,58 +30,29 @@ class Engine extends events_1.EventEmitter {
         this.debug(() => console.log(`Engine#emit: ${String(event)}: ${args}`));
         return super.emit(event, ...args);
     }
-    getPackages(glob = globModule, fs = fsModule) {
-        var _a;
-        const packageDetails = loadJSONSync_1.default('./package.json'), paths = ((_a = packageDetails === null || packageDetails === void 0 ? void 0 : packageDetails['civ-clone']) === null || _a === void 0 ? void 0 : _a.paths) || [
-            './node_modules/@civ-clone/*',
-        ], packages = [];
-        paths.forEach((pathName) => {
-            (glob.sync(pathName) || []).forEach((pathName) => {
-                try {
-                    fs.accessSync(pathName);
-                    const packagePath = path.resolve(pathName, 'package.json');
-                    fs.accessSync(packagePath);
-                    const packageDetails = loadJSONSync_1.default(packagePath);
-                    if (typeof packageDetails.main === 'string') {
-                        const main = path.resolve(pathName, packageDetails.main);
-                        fs.accessSync(main);
-                        packages.push(main);
-                        return;
-                    }
-                    const index = path.resolve(pathName, 'index.js');
-                    fs.accessSync(index);
-                    packages.push(index);
-                    return;
-                }
-                catch (e) {
-                    this.emit('engine:plugins:load:read-path:failed', pathName);
-                }
-            });
-        });
-        return packages;
-    }
     loadPlugins() {
-        this.emit('engine:plugins:load');
-        return Promise.all(this.getPackages().map((packageName) => Promise.resolve().then(() => require(packageName)).then(() => this.emit('engine:plugins:load:success', packageName))
-            .catch(() => this.emit('engine:plugins:load:failed', packageName)))).then(() => this.emit('engine:plugins-loaded'));
+        this.emit('plugins:load:start');
+        return new Promise((resolve, reject) => {
+            this.once('plugins:load:end', () => resolve());
+        });
     }
     /**
      * Options are per-instance settings that affect only the current instance.
      */
     option(key, defaultValue = null) {
-        return __classPrivateFieldGet(this, _options)[key] || defaultValue;
+        return __classPrivateFieldGet(this, _Engine_options, "f")[key] || defaultValue;
     }
     setOption(key, value) {
-        if (__classPrivateFieldGet(this, _options)[key] !== value) {
-            __classPrivateFieldGet(this, _options)[key] = value;
+        if (__classPrivateFieldGet(this, _Engine_options, "f")[key] !== value) {
+            __classPrivateFieldGet(this, _Engine_options, "f")[key] = value;
             this.emit('option:changed', key, value);
         }
     }
     start() {
-        if (__classPrivateFieldGet(this, _started)) {
+        if (__classPrivateFieldGet(this, _Engine_started, "f")) {
             return;
         }
-        __classPrivateFieldSet(this, _started, true);
+        __classPrivateFieldSet(this, _Engine_started, true, "f");
         this.emit('engine:initialise');
         this.loadPlugins().then(() => {
             this.emit('engine:start');
@@ -95,7 +60,7 @@ class Engine extends events_1.EventEmitter {
     }
 }
 exports.Engine = Engine;
-_options = new WeakMap(), _started = new WeakMap();
+_Engine_options = new WeakMap(), _Engine_started = new WeakMap();
 exports.instance = new Engine();
 exports.default = Engine;
 //# sourceMappingURL=Engine.js.map

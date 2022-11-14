@@ -1,10 +1,4 @@
-/// <reference types="node" />
-import { EventEmitter } from 'events';
-import * as fsModule from 'fs';
-import { IOptions } from 'glob';
-interface IGlob {
-  sync(pattern: string, options?: IOptions): string[];
-}
+import EventEmitter from '@dom111/typed-event-emitter/EventEmitter';
 export interface IEngine {
   debug(callback: (...args: any[]) => void): void;
   emit(event: string, ...args: any[]): void;
@@ -15,9 +9,8 @@ export interface IEngine {
 export declare class Engine extends EventEmitter implements IEngine {
   #private;
   debug(callback: (...args: any[]) => void): void;
-  emit(event: string | symbol, ...args: any[]): boolean;
-  getPackages(glob?: IGlob, fs?: typeof fsModule): string[];
-  loadPlugins(): Promise<boolean>;
+  emit(event: string | number, ...args: any[]): void;
+  loadPlugins(): Promise<void>;
   /**
    * Options are per-instance settings that affect only the current instance.
    */
