@@ -7,7 +7,8 @@ export interface IEngine {
   start(): void;
 }
 export declare class Engine extends EventEmitter implements IEngine {
-  #private;
+  private _options;
+  private _started;
   debug(callback: (...args: any[]) => void): void;
   emit(event: string | number, ...args: any[]): void;
   loadPlugins(): Promise<void>;

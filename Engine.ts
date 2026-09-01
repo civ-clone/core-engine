@@ -9,10 +9,10 @@ export interface IEngine {
 }
 
 export class Engine extends EventEmitter implements IEngine {
-  #options: {
+  private _options: {
     [key: string]: any;
   } = {};
-  #started: boolean = false;
+  private _started: boolean = false;
 
   debug(callback: (...args: any[]) => void): void {
     if (!this.option('debug')) {
@@ -42,23 +42,23 @@ export class Engine extends EventEmitter implements IEngine {
    * Options are per-instance settings that affect only the current instance.
    */
   option(key: string, defaultValue: any = null): any {
-    return this.#options[key] || defaultValue;
+    return this._options[key] || defaultValue;
   }
 
   setOption(key: string, value: any): void {
-    if (this.#options[key] !== value) {
-      this.#options[key] = value;
+    if (this._options[key] !== value) {
+      this._options[key] = value;
 
       this.emit('option:changed', key, value);
     }
   }
 
   start(): void {
-    if (this.#started) {
+    if (this._started) {
       return;
     }
 
-    this.#started = true;
+    this._started = true;
 
     this.emit('engine:initialise');
 
