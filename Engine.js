@@ -6,6 +6,7 @@ class Engine extends EventEmitter_1.default {
     constructor() {
         super(...arguments);
         this._options = {};
+        this._plugins = {};
         this._started = false;
     }
     debug(callback) {
@@ -29,6 +30,33 @@ class Engine extends EventEmitter_1.default {
      */
     option(key, defaultValue = null) {
         return this._options[key] || defaultValue;
+    }
+    /**
+     * Every loaded package and its exact version, for a save to record.
+     *
+     * Plugins load as bare side-effect imports from a list the host generates —
+     * nothing announces itself, so there is no manifest to read back. Rather than
+     * have 123 packages each call `registerPlugins` with their own name, the host
+     * that generated the import list registers the whole manifest: it is the one
+     * place that already knows both the names and the versions, and it cannot
+     * drift out of step with the imports it wrote.
+     *
+     * A save uses this for three-tier compatibility — refuse a missing plugin,
+     * allow an extra one, warn on a version change. An empty manifest therefore
+     * means "cannot check", not "nothing loaded", and `core-save-game` refuses to
+     * *write* a save without one rather than emitting a file that silently
+     * cannot be validated.
+     */
+    plugins() {
+        return { ...this._plugins };
+    }
+    /**
+     * Merge into the manifest. Additive, because a host may register in more than
+     * one batch, and last write wins for a name registered twice.
+     */
+    registerPlugins(plugins) {
+        Object.assign(this._plugins, plugins);
+        this.emit('plugins:registered', plugins);
     }
     setOption(key, value) {
         if (this._options[key] !== value) {
