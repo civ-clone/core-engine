@@ -21,6 +21,9 @@ export declare class Engine extends EventEmitter implements IEngine {
   loadPlugins(): Promise<void>;
   /**
    * Options are per-instance settings that affect only the current instance.
+   *
+   * Only a missing option falls back to the default: a stored `0`, `false` or
+   * `''` is a value, and a 0-based setting would otherwise lose its first one.
    */
   option(key: string, defaultValue?: any): any;
   /**

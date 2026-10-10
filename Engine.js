@@ -27,9 +27,13 @@ class Engine extends EventEmitter_1.default {
     }
     /**
      * Options are per-instance settings that affect only the current instance.
+     *
+     * Only a missing option falls back to the default: a stored `0`, `false` or
+     * `''` is a value, and a 0-based setting would otherwise lose its first one.
      */
     option(key, defaultValue = null) {
-        return this._options[key] || defaultValue;
+        var _a;
+        return (_a = this._options[key]) !== null && _a !== void 0 ? _a : defaultValue;
     }
     /**
      * Every loaded package and its exact version, for a save to record.
